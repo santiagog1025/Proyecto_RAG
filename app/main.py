@@ -1,7 +1,7 @@
 # app/main.py
 
 from fastapi import FastAPI
-from app.routes import router
+from routes import router
 
 # Inicializar la aplicación de FastAPI
 app = FastAPI(

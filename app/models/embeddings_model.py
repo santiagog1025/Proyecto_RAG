@@ -1,22 +1,23 @@
 from langchain_community.embeddings import HuggingFaceEmbeddings
-from langchain.vectorstores import Chroma
+from langchain_community.vectorstores import Chroma
 from typing import List
 import os
 
-# Configuración de embeddings de OpenAI
+# Configuración de embeddings de Hugging Face
 def configurar_embeddings() -> HuggingFaceEmbeddings:
     """
-    Configura el modelo de embeddings de OpenAI.
+    Configura el modelo de embeddings de Hugging Face.
 
     Returns:
-        OpenAIEmbeddings: Modelo de embeddings configurado.
+        HuggingFaceEmbeddings: Modelo de embeddings configurado.
     """
-    # Configura la clave de la API de OpenAI desde las variables de entorno
-    api_key = os.getenv("OPENAI_API_KEY")
-    if not api_key:
-        raise ValueError("La API key de OpenAI no está configurada en las variables de entorno.")
+    # Configura la clave de la API de Hugging Face desde las variables de entorno
+    hf_api_key = os.getenv("HUGGINGFACE_API_KEY")
+    if not hf_api_key:
+        raise ValueError("La API key de Hugging Face no está configurada en las variables de entorno.")
     
-    return HuggingFaceEmbeddings()
+    # Asumiendo que se utiliza un modelo preentrenado de Hugging Face
+    return HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")  # Se puede personalizar según el modelo que se prefiera
 
 # Crear la base de datos de embeddings con Chroma para búsquedas de similaridad
 def crear_vector_store(documentos: List[str]) -> Chroma:

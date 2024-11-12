@@ -1,8 +1,8 @@
 # app/routes.py
 
 from fastapi import APIRouter, UploadFile, File, HTTPException
-from app.utils import leer_pdf
-from app.models.optimizations import optimizar_cv
+from utils import leer_pdf
+from models.optimizations import optimizar_cv_rag
 
 # Crear el enrutador
 router = APIRouter()
@@ -33,7 +33,7 @@ async def optimize_cv(file: UploadFile = File(...), job_position: str = ""):
         texto_cv = leer_pdf(file)
 
         # Optimizar el currículum en función del cargo deseado
-        optimizaciones = optimizar_cv(texto_cv, job_position)
+        optimizaciones = optimizar_cv_rag(texto_cv, job_position)
         return {"optimizaciones": optimizaciones}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error al optimizar el CV: {str(e)}")

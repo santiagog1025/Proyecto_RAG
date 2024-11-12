@@ -1,9 +1,8 @@
-# app/models/optimizations_rag.py
-
+import os
 from langchain.prompts import PromptTemplate
 from langchain_groq import ChatGroq
 from langchain.chains import RetrievalQA
-from app.models.embeddings_model import crear_vector_store
+from models.embeddings_model import crear_vector_store
 from typing import List, Dict
 
 def optimizar_cv_rag(texto_cv: str, job_position: str, documentos: List[str]) -> Dict[str, List[str]]:
@@ -22,7 +21,7 @@ def optimizar_cv_rag(texto_cv: str, job_position: str, documentos: List[str]) ->
     vector_store = crear_vector_store(documentos)
 
     # Configurar el modelo de lenguaje y la plantilla de prompt
-    llm = ChatGroq(model_name="mixtral-8x7b-32768")
+    llm = ChatGroq(model_name="mixtral-8x7b-32768", groq_api_key=os.getenv("GROQ_API_KEY"))
     prompt_template = PromptTemplate(
         input_variables=["context", "cv_text", "job_position"],
         template=(

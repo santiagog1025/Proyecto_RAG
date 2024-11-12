@@ -25,10 +25,8 @@ def optimizar_cv_rag(texto_cv: str, job_position: str, documentos: List[str]) ->
     prompt_template = PromptTemplate(
         input_variables=["context", "cv_text", "job_position"],
         template=(
-  "Contexto del puesto de trabajo:\n"
+  "Currículum:\n"
     "{context}\n\n"
-    "Currículum:\n"
-    "{cv_text}\n\n"
     "Puesto objetivo:\n"
     "{job_position}\n\n"
     "Instrucciones:\n"

@@ -1,50 +1,53 @@
-# streamlit_app.py
-
 import streamlit as st
 import requests
 
-# Configuración de la aplicación de Streamlit
-st.set_page_config(page_title="Optimizador de Currículums", layout="centered")
+# URL de tu API de FastAPI (ajusta la URL si es diferente)
+API_URL = "http://127.0.0.1:8000/optimize_cv/"
 
-# Encabezado de la aplicación
-st.title("Optimizador de Currículums")
-st.write("Sube tu currículum en PDF y recibe sugerencias para optimizarlo según el cargo deseado.")
+def optimizar_cv(file, job_position):
+    """Hace la solicitud POST a FastAPI para optimizar el CV."""
+    # Leer el archivo PDF como bytes
+    file_bytes = file.read()
+    
+    # Asegúrate de enviar el archivo como multipart/form-data
+    files = {'file': ('curriculum.pdf', file_bytes, 'application/pdf')}
+    data = {'job_position': job_position}
 
-# Cargar el archivo PDF
-uploaded_file = st.file_uploader("Cargar currículum en PDF", type=["pdf"])
+    # Mostrar los datos que se enviarán para depuración
+    st.write("Enviando datos a FastAPI:")
+    st.write(data)  # Imprime los datos enviados
 
-# Campo para ingresar el cargo deseado
-job_position = st.text_input("Cargo al que deseas aplicar")
+    try:
+        # Realizar la solicitud POST
+        response = requests.post(API_URL, files=files, data=data)
+        response.raise_for_status()  # Esto genera una excepción si el código de estado HTTP no es 2xx
+        return response.json()  # Retorna la respuesta como JSON
+    except requests.exceptions.RequestException as e:
+        st.error(f"Error al hacer la solicitud: {e}")
+        return None
 
-# Botón para procesar el currículum
-if st.button("Optimizar Currículum"):
-    # Verificar que se haya cargado un archivo y especificado el cargo
-    if uploaded_file is not None and job_position:
-        # Enviar el archivo PDF y el cargo a la API
-        try:
-            # Enviar el archivo a la API para extraer el texto
-            files = {"file": uploaded_file.getvalue()}
-            response = requests.post("http://localhost:8000/upload_cv/", files=files)
+# Título de la aplicación
+st.title("Optimización de Currículum")
 
-            if response.status_code == 200:
-                texto_cv = response.json().get("texto_cv", "")
+# Subir el archivo PDF
+uploaded_file = st.file_uploader("Cargar tu currículum (PDF)", type="pdf")
 
-                # Enviar el texto y cargo para obtener las sugerencias de optimización
-                data = {"file": uploaded_file.getvalue(), "job_position": job_position}
-                optimize_response = requests.post("http://localhost:8000/optimize_cv/", files=files, data={"job_position": job_position})
+# Especificar el puesto de trabajo
+job_position = st.text_input("Especifica el cargo deseado", "")
 
-                if optimize_response.status_code == 200:
-                    sugerencias = optimize_response.json().get("optimizaciones", {}).get("sugerencias", [])
+# Verificar si el archivo y el puesto han sido cargados antes de habilitar el botón
+if uploaded_file is not None and job_position.strip() != "":
+    # Botón para optimizar el CV
+    if st.button("Optimizar CV"):
+        with st.spinner("Optimizando..."):
+            result = optimizar_cv(uploaded_file, job_position)
 
-                    # Mostrar las sugerencias
-                    st.subheader("Sugerencias de Optimización:")
-                    for idx, sugerencia in enumerate(sugerencias, 1):
-                        st.write(f"{idx}. {sugerencia}")
+            # Verificar si hay un resultado
+            if result is not None:
+                if "optimizaciones" in result:
+                    st.success("¡Optimización completada!")
+                    st.write(result["optimizaciones"])
                 else:
-                    st.error("Error al optimizar el currículum. Inténtalo de nuevo.")
-            else:
-                st.error("Error al leer el archivo PDF. Asegúrate de que esté en el formato correcto.")
-        except Exception as e:
-            st.error(f"Ocurrió un error: {str(e)}")
-    else:
-        st.warning("Por favor, carga un currículum y especifica el cargo.")
+                    st.error(f"Error en la optimización: {result.get('detail', 'Desconocido')}")
+else:
+    st.warning("Por favor, carga un currículum y especifica un cargo deseado.")

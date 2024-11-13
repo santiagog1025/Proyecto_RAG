@@ -7,7 +7,6 @@ from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.document_loaders import PyPDFLoader
 from langchain.chains import LLMChain
 import os
-import io
 
 def leer_pdf(file) -> str:
     """
@@ -59,7 +58,7 @@ def configurar_rag(documento, puesto) -> RetrievalQA:
             Responde con la información más relevante relacionada con la consulta que debería estar relacionada al puesto de trabajo al que aspira el usuario. ten en cuenta que tienes un máximo de 1000 tokens para responder"
     """
     # Crear la cadena RAG
-    llm = ChatGroq(model_name="mixtral-8x7b-32768", groq_api_key="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", temperature= 0, max_tokens=1000)
+    llm = ChatGroq(model_name="mixtral-8x7b-32768", groq_api_key=os.getenv("GROQ_API_KEY"), temperature= 0, max_tokens=1000)
     rag_chain = RetrievalQA.from_chain_type(
         retriever=vector_store.as_retriever(),
         return_source_documents=True,
@@ -111,7 +110,7 @@ def configurar_agente_rag(documento, puesto):
 
 
     # Crear un modelo de lenguaje de LangChain 
-    llm = ChatGroq(model="gemma2-9b-it", groq_api_key="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", max_tokens=1000) 
+    llm = ChatGroq(model="gemma2-9b-it", groq_api_key=os.getenv("GROQ_API_KEY"), max_tokens=1000) 
 
     # Crear un LLMChain con el prompt y el modelo
     llm_chain = LLMChain(prompt=PromptTemplate.from_template(prompt_template), llm=llm)
